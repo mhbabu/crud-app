@@ -9,10 +9,30 @@ use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data['products'] = Product::latest()->paginate(10);
-        return view('product.index', $data);
+        $products = Product::query();
+        $query    = $request->input('search');
+        $sortBy   = $request->input('sort_by', 'asc'); // Default to 'asc' if not provided
+
+        if (isset($query)) {
+            $products->where('name', 'like', "%{$query}%")
+                ->orWhere('price', 'like', "%{$query}%")
+                ->orWhere('discount', 'like', "%{$query}%")
+                ->orWhere('status', 'like', "%{$query}%");
+        }
+
+        if (isset($sortBy)) {
+            $products->orderBy('price', $sortBy);
+        }
+
+        $products = $products->paginate(10);
+
+        if ($request->ajax()) {
+            return view('product.filtered-product', compact('products'))->render();
+        }
+
+        return view('product.index', compact('products'));
     }
 
     public function create()
@@ -49,7 +69,7 @@ class ProductController extends Controller
                 $thumbnail          = $request->file('thumbnail')->store('thumbnails', 'public');
                 $product->thumbnail = $thumbnail;
             }
-    
+
             if ($request->hasFile('images')) {
                 $images = [];
                 foreach ($request->file('images') as $image) {
@@ -57,7 +77,7 @@ class ProductController extends Controller
                 }
                 $product->images = json_encode($images);
             }
-    
+
             $product->save();
 
             return response()->json([
@@ -111,7 +131,7 @@ class ProductController extends Controller
                 $thumbnail          = $request->file('thumbnail')->store('thumbnails', 'public');
                 $product->thumbnail = $thumbnail;
             }
-    
+
             if ($request->hasFile('images')) {
                 $images = [];
                 foreach ($request->file('images') as $image) {
@@ -119,7 +139,7 @@ class ProductController extends Controller
                 }
                 $product->images = json_encode($images);
             }
-    
+
             $product->save();
 
             return response()->json([

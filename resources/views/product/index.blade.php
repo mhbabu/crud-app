@@ -13,43 +13,49 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-12 my-2">
-                    {!! html()->text('search')->class('form-control')->placeholder('Search..')->autofocus() !!}
+                <div class="col-md-6 my-2">
+                    {!! html()->text('search')->class('form-control')->placeholder('Search..')->id('search')->autofocus() !!}
+                </div>
+                <div class="col-md-6 my-2">
+                    {!! html()->select('sort_by')->options(['desc' => 'Highest Price', 'asc' => 'Lowest Price'])->class('form-control')->id('sortBy')->placeholder('Sort By')->autofocus() !!}
                 </div>
             </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Discount</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($products as $product)
+            <div id="productArea">
+                <table class="table" id="product-table">
+                    <thead>
                         <tr>
-                            <td>{{ $product->name }}</td>
-                            <td>{{ $product->price ?? '-' }}</td>
-                            <td>{{ $product->discount }}</td>
-                            <td>{{ ucfirst($product->status) }}</td>
-                            <td>
-                                <a class="btn btn-primary btn-sm AppModal" data-bs-toggle="modal"
-                                data-bs-target="#AppModal" href="{{ route('products.edit', $product->id) }}">
-                                    Edit</a>
-                                <a class="btn btn-danger btn-sm" href="{{ route('products.delete', $product->id) }}">
-                                    Delete</a>
-                            </td>
+                            <th scope="col">Name</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Discount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Action</th>
                         </tr>
-                    @empty  
-                        <tr class="text-center">
-                            <td colspan="5">No record found...!</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-            {{ $products->links('pagination::bootstrap-5') }}
+                    </thead>
+                    <tbody>
+                        @forelse($products as $product)
+                            <tr>
+                                <td>{{ $product->name }}</td>
+                                <td>{{ $product->price ?? '-' }}</td>
+                                <td>{{ $product->discount }}</td>
+                                <td>{{ ucfirst($product->status) }}</td>
+                                <td>
+                                    <a class="btn btn-primary btn-sm AppModal" data-bs-toggle="modal"
+                                    data-bs-target="#AppModal" href="{{ route('products.edit', $product->id) }}">
+                                        Edit</a>
+                                    <a class="btn btn-danger btn-sm" href="{{ route('products.delete', $product->id) }}">
+                                        Delete</a>
+                                </td>
+                            </tr>
+                        @empty  
+                            <tr class="text-center">
+                                <td colspan="5">No record found...!</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                {{ $products->links('pagination::bootstrap-5') }}
+            </div>
+           
         </div>
     </div>
     @include('layouts.includes.modal-dialogue')
@@ -61,8 +67,8 @@
 
     <script>
         /**************************
-            DYNAMIC MODAL SCRIPT HERE
-            **************************/
+        DYNAMIC MODAL SCRIPT HERE
+        **************************/
         $(document.body).on('click', '.AppModal', function(e) {
             e.preventDefault();
             $('#ModalContent').html(
@@ -78,6 +84,21 @@
                     return this;
                 }
             );
+        });
+
+        // AJAX Search
+        // AJAX Search and Sort
+        $('#search, #sortBy').on('change keyup', function() {
+            let query = $('#search').val();
+            let sortBy = $('#sortBy').val();
+            $.ajax({
+                url: "{{ route('products.index') }}",
+                method: "GET",
+                data: { search: query, sort_by: sortBy },
+                success: function(data) {
+                    $('#productArea').html(data);
+                }
+            });
         });
     </script>
 @endsection
