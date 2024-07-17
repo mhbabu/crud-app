@@ -19,7 +19,7 @@
                     <a class="btn btn-primary btn-sm AppModal" data-bs-toggle="modal"
                     data-bs-target="#AppModal" href="{{ route('products.edit', $product->id) }}">
                         Edit</a>
-                    <a class="btn btn-danger btn-sm" href="{{ route('products.delete', $product->id) }}">
+                    <a class="btn btn-danger btn-sm" onclick="return confirm('Are you sure to delete this item?')"href="{{ route('products.delete', $product->id) }}">
                         Delete</a>
                 </td>
             </tr>
