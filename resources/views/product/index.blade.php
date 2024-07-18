@@ -86,7 +86,6 @@
             );
         });
 
-        // AJAX Search
         // AJAX Search and Sort
         $('#search, #sortBy').on('change keyup', function() {
             let query = $('#search').val();
